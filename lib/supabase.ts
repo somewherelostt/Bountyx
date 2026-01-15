@@ -27,32 +27,9 @@ export function getSupabase(): SupabaseClient {
     }
 
     _supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      fetch: (url, options = {}) => {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-
-        return fetch(url, {
-          ...options,
-          signal: controller.signal,
-        })
-          .catch((error) => {
-            clearTimeout(timeoutId);
-            if (error.name === "AbortError" || error.name === "TimeoutError") {
-              throw new Error(`Supabase request timeout: ${url}`);
-            }
-            if (
-              error.code === "ENOTFOUND" ||
-              error.message?.includes("getaddrinfo")
-            ) {
-              throw new Error(
-                `DNS resolution failed for Supabase URL: ${url}. Check your network connection and verify the Supabase project URL is correct.`
-              );
-            }
-            throw error;
-          })
-          .finally(() => {
-            clearTimeout(timeoutId);
-          });
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
       },
     });
   }
@@ -82,32 +59,9 @@ export function getSupabaseAdmin(): SupabaseClient {
     }
 
     _supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-      fetch: (url, options = {}) => {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-
-        return fetch(url, {
-          ...options,
-          signal: controller.signal,
-        })
-          .catch((error) => {
-            clearTimeout(timeoutId);
-            if (error.name === "AbortError" || error.name === "TimeoutError") {
-              throw new Error(`Supabase request timeout: ${url}`);
-            }
-            if (
-              error.code === "ENOTFOUND" ||
-              error.message?.includes("getaddrinfo")
-            ) {
-              throw new Error(
-                `DNS resolution failed for Supabase URL: ${url}. Check your network connection and verify the Supabase project URL is correct.`
-              );
-            }
-            throw error;
-          })
-          .finally(() => {
-            clearTimeout(timeoutId);
-          });
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
       },
     });
   }

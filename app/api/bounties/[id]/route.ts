@@ -4,10 +4,10 @@ import { supabaseAdmin } from "@/lib/supabase";
 // GET: Get bounty by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json(
@@ -24,11 +24,16 @@ export async function GET(
 
     if (error) {
       console.error("Supabase query error:", error);
-      
+
       // Provide more helpful error messages
       let errorMessage = "Failed to fetch bounty";
-      if (error.message?.includes("DNS") || error.message?.includes("getaddrinfo") || error.message?.includes("ENOTFOUND")) {
-        errorMessage = "Database connection failed. Please check your network connection and verify your Supabase configuration.";
+      if (
+        error.message?.includes("DNS") ||
+        error.message?.includes("getaddrinfo") ||
+        error.message?.includes("ENOTFOUND")
+      ) {
+        errorMessage =
+          "Database connection failed. Please check your network connection and verify your Supabase configuration.";
       } else if (error.message?.includes("timeout")) {
         errorMessage = "Database request timed out. Please try again.";
       } else if (error.code === "PGRST116") {
@@ -38,11 +43,12 @@ export async function GET(
           { status: 404 }
         );
       }
-      
+
       return NextResponse.json(
-        { 
+        {
           message: errorMessage,
-          error: process.env.NODE_ENV === "development" ? error.message : undefined
+          error:
+            process.env.NODE_ENV === "development" ? error.message : undefined,
         },
         { status: 500 }
       );
@@ -57,4 +63,3 @@ export async function GET(
     );
   }
 }
-
