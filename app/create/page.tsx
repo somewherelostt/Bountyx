@@ -12,8 +12,8 @@ import { arbitrumSepolia } from "@/lib/arbitrum";
 type CreateStep = "FORM" | "PAYMENT" | "CONFIRMING" | "SUCCESS" | "ERROR";
 
 // x402 uses USDC, displayed in dollars
-const CREATION_FEE_USDC = 0.000001; // Minimum for testing
-const CREATION_FEE_DISPLAY = "~$0 USDC";
+const CREATION_FEE_USDC = 0.000001; // 1 unit = absolute minimum for testnet
+const CREATION_FEE_DISPLAY = "0.000001 USDC";
 
 interface PrizeTier {
   rank: number;
