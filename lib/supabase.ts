@@ -22,7 +22,7 @@ export function getSupabase(): SupabaseClient {
           `Warning: Supabase URL hostname "${url.hostname}" doesn't look like a valid Supabase URL`
         );
       }
-    } catch (e) {
+    } catch {
       throw new Error(`Invalid Supabase URL format: ${supabaseUrl}`);
     }
 
@@ -77,7 +77,7 @@ export function getSupabaseAdmin(): SupabaseClient {
           `Warning: Supabase URL hostname "${url.hostname}" doesn't look like a valid Supabase URL`
         );
       }
-    } catch (e) {
+    } catch {
       throw new Error(`Invalid Supabase URL format: ${supabaseUrl}`);
     }
 

@@ -94,12 +94,12 @@ export default function CreatePage() {
       setError("Please connect your wallet first.");
       return;
     }
-    
+
     if (!walletsReady) {
       setError("Wallet is initializing. Please wait a moment and try again.");
       return;
     }
-    
+
     if (!wallets || wallets.length === 0) {
       setError("No wallet found. Please connect your wallet.");
       return;
@@ -137,17 +137,23 @@ export default function CreatePage() {
         // Get the wallet to send USDC payment
         const wallet = embeddedWallet || wallets[0];
         if (!wallet) {
-          throw new Error("No wallet available. Please connect your wallet and try again.");
+          throw new Error(
+            "No wallet available. Please connect your wallet and try again."
+          );
         }
-        
+
         // Ensure wallet is ready
         if (!walletsReady) {
-          throw new Error("Wallet is not ready yet. Please wait a moment and try again.");
+          throw new Error(
+            "Wallet is not ready yet. Please wait a moment and try again."
+          );
         }
-        
+
         // Check if wallet has an address
         if (!wallet.address) {
-          throw new Error("Wallet address not available. Please reconnect your wallet.");
+          throw new Error(
+            "Wallet address not available. Please reconnect your wallet."
+          );
         }
 
         // Ensure wallet is on Arbitrum Sepolia before sending transaction
@@ -172,7 +178,11 @@ export default function CreatePage() {
         } catch (providerError) {
           console.error("Provider error:", providerError);
           throw new Error(
-            `Failed to connect to wallet provider: ${providerError instanceof Error ? providerError.message : "Unknown error"}. Please ensure your wallet is connected and try again.`
+            `Failed to connect to wallet provider: ${
+              providerError instanceof Error
+                ? providerError.message
+                : "Unknown error"
+            }. Please ensure your wallet is connected and try again.`
           );
         }
 
@@ -182,17 +192,23 @@ export default function CreatePage() {
           currentChainId = await provider.request({
             method: "eth_chainId",
           });
-        } catch (chainError: any) {
+        } catch (chainError: unknown) {
           console.error("Chain ID request error:", chainError);
           // If it's a JSON-RPC error, provide more context
-          if (chainError?.code || chainError?.message?.includes("JSON-RPC")) {
+          const error = chainError as {
+            code?: number | string;
+            message?: string;
+          };
+          if (error?.code || error?.message?.includes("JSON-RPC")) {
             throw new Error(
-              `Wallet connection error: ${chainError.message || "Failed to communicate with wallet"}. Please try reconnecting your wallet.`
+              `Wallet connection error: ${
+                error.message || "Failed to communicate with wallet"
+              }. Please try reconnecting your wallet.`
             );
           }
           throw chainError;
         }
-        
+
         const expectedChainId = `0x${arbitrumSepolia.id.toString(16)}`;
 
         if (currentChainId !== expectedChainId) {
@@ -217,9 +233,10 @@ export default function CreatePage() {
 
         // Import ethers dynamically
         const { Contract, BrowserProvider } = await import("ethers");
+        type BrowserProviderType = InstanceType<typeof BrowserProvider>;
 
         // Create ethers provider and signer with error handling
-        let ethersProvider: BrowserProvider;
+        let ethersProvider: BrowserProviderType;
         let signer;
         try {
           ethersProvider = new BrowserProvider(provider);
@@ -227,10 +244,13 @@ export default function CreatePage() {
           if (!signer) {
             throw new Error("Failed to get signer from provider");
           }
-        } catch (ethersError: any) {
+        } catch (ethersError: unknown) {
           console.error("Ethers provider error:", ethersError);
+          const error = ethersError as { message?: string };
           throw new Error(
-            `Failed to initialize wallet connection: ${ethersError.message || "Unknown error"}. Please ensure your wallet is unlocked and try again.`
+            `Failed to initialize wallet connection: ${
+              error.message || "Unknown error"
+            }. Please ensure your wallet is unlocked and try again.`
           );
         }
 
@@ -265,7 +285,7 @@ export default function CreatePage() {
 
         try {
           // Try using ethers Contract method first
-          const txOptions: any = {};
+          const txOptions: { gasLimit?: bigint } = {};
           if (gasEstimate) {
             txOptions.gasLimit = gasEstimate;
           }
@@ -285,17 +305,27 @@ export default function CreatePage() {
           // Wait for transaction confirmation
           const receipt = await tx.wait();
           txHash = receipt.hash;
-        } catch (ethersError: any) {
+        } catch (ethersError: unknown) {
           // If ethers fails (common with MetaMask RPC errors), try manual transaction
           // This is expected behavior - MetaMask sometimes has RPC issues but manual approach works
-          const isRpcError = ethersError?.code === "UNKNOWN_ERROR" || 
-                            ethersError?.code === -32603 ||
-                            ethersError?.message?.includes("JSON-RPC");
-          
+          const error = ethersError as {
+            code?: number | string;
+            message?: string;
+          };
+          const isRpcError =
+            error?.code === "UNKNOWN_ERROR" ||
+            error?.code === -32603 ||
+            error?.message?.includes("JSON-RPC");
+
           if (isRpcError) {
-            console.log("MetaMask RPC error detected, using manual transaction method (this is normal)");
+            console.log(
+              "MetaMask RPC error detected, using manual transaction method (this is normal)"
+            );
           } else {
-            console.warn("Ethers transaction failed, trying manual approach:", ethersError);
+            console.warn(
+              "Ethers transaction failed, trying manual approach:",
+              ethersError
+            );
           }
 
           // Use the contract interface to encode the function call
@@ -309,16 +339,21 @@ export default function CreatePage() {
           let accounts: string[];
           try {
             accounts = await provider.request({ method: "eth_accounts" });
-          } catch (accountsError: any) {
+          } catch (accountsError: unknown) {
             console.error("Accounts request error:", accountsError);
+            const error = accountsError as { message?: string };
             throw new Error(
-              `Failed to get wallet accounts: ${accountsError.message || "Unknown error"}. Please ensure your wallet is connected.`
+              `Failed to get wallet accounts: ${
+                error.message || "Unknown error"
+              }. Please ensure your wallet is connected.`
             );
           }
           const fromAddress = accounts[0] || address;
-          
+
           if (!fromAddress) {
-            throw new Error("No wallet address found. Please connect your wallet.");
+            throw new Error(
+              "No wallet address found. Please connect your wallet."
+            );
           }
 
           // Estimate gas if not already done
@@ -349,7 +384,7 @@ export default function CreatePage() {
           }
 
           // Send transaction with explicit chainId and error handling
-          let txResponse: any;
+          let txResponse: string | { hash?: string } | unknown;
           try {
             txResponse = await provider.request({
               method: "eth_sendTransaction",
@@ -363,26 +398,41 @@ export default function CreatePage() {
                 },
               ],
             });
-          } catch (txError: any) {
+          } catch (txError: unknown) {
             console.error("Manual transaction send error:", txError);
             // Provide more helpful error messages
-            if (txError?.code === 4001 || txError?.message?.includes("User rejected") || txError?.message?.includes("rejected")) {
-              throw new Error("Transaction was rejected. Please approve the transaction to continue.");
+            const error = txError as {
+              code?: number | string;
+              message?: string;
+            };
+            if (
+              error?.code === 4001 ||
+              error?.message?.includes("User rejected") ||
+              error?.message?.includes("rejected")
+            ) {
+              throw new Error(
+                "Transaction was rejected. Please approve the transaction to continue."
+              );
             }
-            if (txError?.code === -32603 || txError?.message?.includes("JSON-RPC")) {
+            if (
+              error?.code === -32603 ||
+              error?.message?.includes("JSON-RPC")
+            ) {
               throw new Error(
                 `Wallet connection error. Please try:\n1. Refreshing the page\n2. Reconnecting your wallet\n3. Ensuring your wallet is unlocked`
               );
             }
             throw new Error(
-              `Transaction failed: ${txError.message || "Unknown error"}. Please try again.`
+              `Transaction failed: ${
+                error.message || "Unknown error"
+              }. Please try again.`
             );
           }
 
           txHash =
             typeof txResponse === "string"
               ? txResponse
-              : txResponse.hash || txResponse;
+              : (txResponse as { hash?: string })?.hash || String(txResponse);
           console.log("Transaction sent (manual):", txHash);
           console.log(
             "View on explorer:",
@@ -441,29 +491,38 @@ export default function CreatePage() {
       }
     } catch (err) {
       console.error("Creation failed:", err);
-      
+
       // Provide more helpful error messages for common issues
       let errorMessage = "Unknown error occurred";
-      
+
       if (err instanceof Error) {
         errorMessage = err.message;
-        
+
         // Handle JSON-RPC errors specifically
-        if (err.message.includes("JSON-RPC") || err.message.includes("Internal JSON-RPC")) {
-          errorMessage = "Wallet connection error. Please try:\n1. Refreshing the page\n2. Reconnecting your wallet\n3. Ensuring your wallet is unlocked";
+        if (
+          err.message.includes("JSON-RPC") ||
+          err.message.includes("Internal JSON-RPC")
+        ) {
+          errorMessage =
+            "Wallet connection error. Please try:\n1. Refreshing the page\n2. Reconnecting your wallet\n3. Ensuring your wallet is unlocked";
         }
-        
+
         // Handle network errors
         if (err.message.includes("network") || err.message.includes("fetch")) {
-          errorMessage = "Network error. Please check your internet connection and try again.";
+          errorMessage =
+            "Network error. Please check your internet connection and try again.";
         }
-        
+
         // Handle user rejection
-        if (err.message.includes("rejected") || err.message.includes("denied")) {
-          errorMessage = "Transaction was rejected. Please approve the transaction to continue.";
+        if (
+          err.message.includes("rejected") ||
+          err.message.includes("denied")
+        ) {
+          errorMessage =
+            "Transaction was rejected. Please approve the transaction to continue.";
         }
       }
-      
+
       setError(errorMessage);
       setStep("ERROR");
     }
