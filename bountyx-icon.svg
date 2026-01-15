@@ -1,0 +1,57 @@
+<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="hardShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feOffset dx="16" dy="16" in="SourceGraphic" />
+      <feFlood flood-color="#000000" flood-opacity="1" />
+      <feComposite in2="SourceGraphic" operator="in" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="glowGreen">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Black background -->
+  <rect width="1024" height="1024" fill="#000000"/>
+
+  <!-- Hard shadow platform -->
+  <rect x="200" y="680" width="624" height="80" fill="#000000" stroke="#00FF00" stroke-width="4"/>
+  <rect x="200" y="680" width="624" height="16" fill="#00FF00"/>
+
+  <!-- Neon Green circle (Arbitrum network nod) - behind the B -->
+  <circle cx="512" cy="380" r="140" fill="none" stroke="#00FF00" stroke-width="8" filter="url(#glowGreen)" opacity="0.6"/>
+  <circle cx="512" cy="380" r="100" fill="none" stroke="#00FF00" stroke-width="4" filter="url(#glowGreen)" opacity="0.4"/>
+
+  <!-- The Brutal "B" - constructed from raw geometric blocks -->
+  <!-- Left vertical bar -->
+  <rect x="280" y="200" width="80" height="480" fill="#FFFFFF" stroke="#000000" stroke-width="4" filter="url(#hardShadow)"/>
+
+  <!-- Top right bulge (upper bump of B) -->
+  <rect x="360" y="200" width="200" height="100" fill="#FFFFFF" stroke="#000000" stroke-width="4" filter="url(#hardShadow)"/>
+  <rect x="560" y="200" width="60" height="100" fill="#000000" stroke="#000000" stroke-width="4"/>
+
+  <!-- Middle connector -->
+  <rect x="360" y="300" width="200" height="40" fill="#FFFFFF" stroke="#000000" stroke-width="4" filter="url(#hardShadow)"/>
+
+  <!-- Bottom right bulge (lower bump of B) -->
+  <rect x="360" y="340" width="220" height="120" fill="#FFFFFF" stroke="#000000" stroke-width="4" filter="url(#hardShadow)"/>
+  <rect x="580" y="340" width="40" height="120" fill="#000000" stroke="#000000" stroke-width="4"/>
+
+  <!-- Neon Pink accent stripe (glitch element) -->
+  <rect x="280" y="380" width="80" height="60" fill="#FF00FF" stroke="#000000" stroke-width="4" filter="url(#hardShadow)" opacity="0.8"/>
+
+  <!-- Hard shadow under platform -->
+  <rect x="216" y="696" width="624" height="16" fill="#000000" opacity="0.7"/>
+
+  <!-- Outline frame for industrial look -->
+  <rect x="40" y="40" width="944" height="944" fill="none" stroke="#000000" stroke-width="8"/>
+  <rect x="48" y="48" width="928" height="928" fill="none" stroke="#00FF00" stroke-width="4"/>
+</svg>
+
